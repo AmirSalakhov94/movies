@@ -1,10 +1,7 @@
 package tech.itpark.dto;
 
 import com.google.gson.annotations.SerializedName;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.util.UUID;
 
@@ -14,7 +11,8 @@ import java.util.UUID;
 @AllArgsConstructor
 public class GenreDto {
 
-    private UUID id;
+    @EqualsAndHashCode.Exclude
+    private UUID uuid;
     @SerializedName("id")
     private Long idWithFile;
     private String name;

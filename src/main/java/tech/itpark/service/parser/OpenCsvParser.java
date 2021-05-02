@@ -51,7 +51,8 @@ public class OpenCsvParser implements Parser<CsvParserData> {
         List<MovieDto> movies = parseData.stream()
                 .map(csvData -> {
                     try {
-                        MovieDto movie = MovieDto.builder()
+                        MovieDto.MovieDtoBuilder movieDtoBuilder = MovieDto.builder()
+                                .uuid(UUID.randomUUID())
                                 .idWithFile(csvData.getId())
                                 .adult(csvData.isAdult())
                                 .imdbId(csvData.getImdbId())
@@ -71,31 +72,58 @@ public class OpenCsvParser implements Parser<CsvParserData> {
                                 .title(csvData.getTitle())
                                 .video(csvData.isVideo())
                                 .voteAverage(csvData.getVoteAverage())
-                                .voteCount(csvData.getVoteCount())
-                                .collection(StringUtils.isNotBlank(csvData.getCollections())
-                                        ? gson.fromJson(csvData.getCollections().replace("\\", ""), CollectionDto.class) : null)
-                                .genres(StringUtils.isNotBlank(csvData.getGenres()) ?
-                                        Arrays.asList(gson.fromJson(csvData.getGenres().replace("\\", ""), GenreDto[].class)) : null)
-                                .companies(StringUtils.isNotBlank(csvData.getCompanies()) ?
-                                        Arrays.asList(gson.fromJson(csvData.getCompanies().replace("\\", ""), CompanyDto[].class)) : null)
-                                .countries(StringUtils.isNotBlank(csvData.getCountries()) ?
-                                        Arrays.asList(gson.fromJson(csvData.getCountries().replace("\\", ""), CountryDto[].class)) : null)
-                                .languages(StringUtils.isNotBlank(csvData.getLanguages()) ?
-                                        Arrays.asList(gson.fromJson(csvData.getLanguages().replace("\\", ""), LanguageDto[].class)) : null)
-                                .build();
+                                .voteCount(csvData.getVoteCount());
 
-                        Optional.ofNullable(movie.getCollection())
-                                .ifPresent(collections::add);
-                        Optional.ofNullable(movie.getCompanies())
-                                .ifPresent(companies::addAll);
-                        Optional.ofNullable(movie.getCountries())
-                                .ifPresent(countries::addAll);
-                        Optional.ofNullable(movie.getGenres())
-                                .ifPresent(genres::addAll);
-                        Optional.ofNullable(movie.getLanguages())
-                                .ifPresent(languages::addAll);
+                        Optional.ofNullable(csvData.getCollection())
+                                .filter(StringUtils::isNotBlank)
+                                .map(v -> gson.fromJson(v.replace("\\", ""), CollectionDto.class))
+                                .ifPresent(collection -> {
+                                    collection.setUuid(UUID.randomUUID());
+                                    movieDtoBuilder.collection(collection);
+                                    collections.add(collection);
+                                });
 
-                        return movie;
+                        Optional.ofNullable(csvData.getGenres())
+                                .filter(StringUtils::isNotBlank)
+                                .ifPresent(v -> {
+                                    List<GenreDto> currentGenres = Arrays.stream(gson.fromJson(v.replace("\\", ""), GenreDto[].class))
+                                            .peek(genre -> genre.setUuid(UUID.randomUUID()))
+                                            .collect(Collectors.toList());
+                                    movieDtoBuilder.genres(currentGenres);
+                                    genres.addAll(currentGenres);
+                                });
+
+                        Optional.ofNullable(csvData.getCompanies())
+                                .filter(StringUtils::isNotBlank)
+                                .ifPresent(v -> {
+                                    List<CompanyDto> currentCompanies = Arrays.stream(gson.fromJson(v.replace("\\", ""), CompanyDto[].class))
+                                            .peek(company -> company.setUuid(UUID.randomUUID()))
+                                            .collect(Collectors.toList());
+                                    movieDtoBuilder.companies(currentCompanies);
+                                    companies.addAll(currentCompanies);
+                                });
+
+                        Optional.ofNullable(csvData.getCountries())
+                                .filter(StringUtils::isNotBlank)
+                                .ifPresent(v -> {
+                                    List<CountryDto> currentCountries = Arrays.stream(gson.fromJson(v.replace("\\", ""), CountryDto[].class))
+                                            .peek(country -> country.setUuid(UUID.randomUUID()))
+                                            .collect(Collectors.toList());
+                                    movieDtoBuilder.countries(currentCountries);
+                                    countries.addAll(currentCountries);
+                                });
+
+                        Optional.ofNullable(csvData.getLanguages())
+                                .filter(StringUtils::isNotBlank)
+                                .ifPresent(v -> {
+                                    List<LanguageDto> currentLanguages = Arrays.stream(gson.fromJson(v.replace("\\", ""), LanguageDto[].class))
+                                            .peek(language -> language.setUuid(UUID.randomUUID()))
+                                            .collect(Collectors.toList());
+                                    movieDtoBuilder.languages(currentLanguages);
+                                    languages.addAll(currentLanguages);
+                                });
+
+                        return movieDtoBuilder.build();
                     } catch (Exception ex) {
                         ex.printStackTrace();
                         return null;

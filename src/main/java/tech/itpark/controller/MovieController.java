@@ -10,6 +10,7 @@ import tech.itpark.service.FileUploaderService;
 import tech.itpark.service.MovieService;
 
 import java.util.List;
+import java.util.UUID;
 
 @RequiredArgsConstructor
 @RestController
@@ -29,19 +30,19 @@ public class MovieController {
         return movieService.getMovies(pageable);
     }
 
-    @GetMapping("/{id}")
-    public MovieDto movie(@PathVariable("id") long id) {
-        return movieService.getMovie(id);
+    @GetMapping("/{uuid}")
+    public MovieDto movie(@PathVariable("uuid") UUID uuid) {
+        return movieService.getMovie(uuid);
     }
 
-    @GetMapping("/genre/{genreId}")
-    public List<PreviewMovieDto> topMoviesByGenre(@PathVariable("genreId") long genreId) {
-        return movieService.topMoviesByGenre(genreId);
+    @GetMapping("/genre/{genreUuid}")
+    public List<PreviewMovieDto> topMoviesByGenre(@PathVariable("genreUuid") UUID genreUuid) {
+        return movieService.topMoviesByGenre(genreUuid);
     }
 
-    @GetMapping("/company/{companyId}")
-    public List<PreviewMovieDto> moviesByCompany(@PathVariable("companyId") long companyId) {
-        return movieService.moviesByCompany(companyId);
+    @GetMapping("/company/{companyUuid}")
+    public List<PreviewMovieDto> moviesByCompany(@PathVariable("companyUuid") UUID companyUuid) {
+        return movieService.moviesByCompany(companyUuid);
     }
 
     @PostMapping("/upload")

@@ -7,6 +7,7 @@ import tech.itpark.repository.MovieGenreRepository;
 
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 
 @RequiredArgsConstructor
 @Service
@@ -20,7 +21,7 @@ public class MovieGenreServiceImpl implements MovieGenreService {
     }
 
     @Override
-    public GenreDto getGenre(long id) {
+    public GenreDto getGenre(UUID uuid) {
         return null;
     }
 

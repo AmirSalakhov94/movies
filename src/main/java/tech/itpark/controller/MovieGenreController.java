@@ -9,6 +9,7 @@ import tech.itpark.dto.GenreDto;
 import tech.itpark.service.MovieGenreService;
 
 import java.util.List;
+import java.util.UUID;
 
 @RequiredArgsConstructor
 @RestController
@@ -22,8 +23,8 @@ public class MovieGenreController {
         return movieGenreService.getGeneres();
     }
 
-    @GetMapping("/{id}")
-    public GenreDto genre(@PathVariable("id") long id) {
-        return movieGenreService.getGenre(id);
+    @GetMapping("/{uuid}")
+    public GenreDto genre(@PathVariable("uuid") UUID uuid) {
+        return movieGenreService.getGenre(uuid);
     }
 }

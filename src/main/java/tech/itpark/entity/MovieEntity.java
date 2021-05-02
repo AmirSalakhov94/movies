@@ -5,24 +5,19 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import tech.itpark.dto.*;
 import tech.itpark.dto.enums.Status;
-import tech.itpark.jdbc.annotation.Column;
-import tech.itpark.jdbc.annotation.Entity;
-import tech.itpark.jdbc.annotation.Table;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.UUID;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@Entity
-@Table("movies")
 public class MovieEntity {
 
+    private UUID uuid;
     private boolean adult;
-    @Column("id_with_file")
     private long idWithFile;
-    @Column("imdb_id")
     private String imdbId;
     private long budget;
     private CollectionDto collection;

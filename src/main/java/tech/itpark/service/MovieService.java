@@ -5,6 +5,7 @@ import tech.itpark.dto.Pageable;
 import tech.itpark.dto.PreviewMovieDto;
 
 import java.util.List;
+import java.util.UUID;
 
 public interface MovieService {
 
@@ -12,11 +13,11 @@ public interface MovieService {
 
     List<PreviewMovieDto> getMovies(final Pageable pageable);
 
-    MovieDto getMovie(final long id);
+    MovieDto getMovie(final UUID uuid);
 
-    List<PreviewMovieDto> topMoviesByGenre(final long genreId);
+    List<PreviewMovieDto> topMoviesByGenre(final UUID genreUuid);
 
-    List<PreviewMovieDto> moviesByCompany(final long companyId);
+    List<PreviewMovieDto> moviesByCompany(final UUID companyUuid);
 
-    void save(final List<MovieDto> movies);
+    List<UUID> save(final List<MovieDto> movies);
 }

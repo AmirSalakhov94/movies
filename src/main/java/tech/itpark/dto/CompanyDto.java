@@ -3,6 +3,7 @@ package tech.itpark.dto;
 import com.google.gson.annotations.SerializedName;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 import java.util.UUID;
@@ -12,7 +13,8 @@ import java.util.UUID;
 @AllArgsConstructor
 public class CompanyDto {
 
-    private UUID id;
+    @EqualsAndHashCode.Exclude
+    private UUID uuid;
     @SerializedName("id")
     private Long idWithFile;
     private String name;

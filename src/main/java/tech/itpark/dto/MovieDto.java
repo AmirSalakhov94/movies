@@ -1,9 +1,6 @@
 package tech.itpark.dto;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import tech.itpark.dto.enums.Status;
 
 import java.time.LocalDate;
@@ -16,7 +13,8 @@ import java.util.UUID;
 @AllArgsConstructor
 public class MovieDto {
 
-    private UUID id;
+    @EqualsAndHashCode.Exclude
+    private UUID uuid;
     private boolean adult;
     private long idWithFile;
     private String imdbId;

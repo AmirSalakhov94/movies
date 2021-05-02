@@ -19,7 +19,7 @@ public class CsvDataDto {
     @CsvBindByName
     private long budget;
     @CsvBindByName(column = "belongs_to_collection")
-    private String collections;
+    private String collection;
     @CsvBindByName
     private String genres;
     @CsvBindByName

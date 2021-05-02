@@ -9,6 +9,7 @@ import tech.itpark.dto.CollectionDto;
 import tech.itpark.service.MovieCollectionService;
 
 import java.util.List;
+import java.util.UUID;
 
 @RequiredArgsConstructor
 @RestController
@@ -22,8 +23,8 @@ public class MovieCollectionController {
         return movieCollectionService.getCollections();
     }
 
-    @GetMapping("/{id}")
-    public CollectionDto collection(@PathVariable("id") long id) {
-        return movieCollectionService.getCollection(id);
+    @GetMapping("/{uuid}")
+    public CollectionDto collection(@PathVariable("uuid") UUID uuid) {
+        return movieCollectionService.getCollection(uuid);
     }
 }

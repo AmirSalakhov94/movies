@@ -9,6 +9,7 @@ import tech.itpark.dto.CompanyDto;
 import tech.itpark.service.ProductionCompanyService;
 
 import java.util.List;
+import java.util.UUID;
 
 @RequiredArgsConstructor
 @RestController
@@ -22,8 +23,8 @@ public class ProductionCompanyController {
         return productionCompanyService.getCompanies();
     }
 
-    @GetMapping("/{id}")
-    public CompanyDto company(@PathVariable("id") long id) {
-        return productionCompanyService.getCompany(id);
+    @GetMapping("/{uuid}")
+    public CompanyDto company(@PathVariable("uuid") UUID uuid) {
+        return productionCompanyService.getCompany(uuid);
     }
 }

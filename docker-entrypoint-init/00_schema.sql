@@ -1,6 +1,6 @@
 CREATE TABLE movies
 (
-    id                BIGSERIAL PRIMARY KEY,
+    uuid              UUID PRIMARY KEY,
     id_with_file      BIGSERIAL,
     is_adult          BOOLEAN,
     budget            BIGSERIAL,
@@ -24,62 +24,67 @@ CREATE TABLE movies
 
 CREATE TABLE collections
 (
-    id            BIGSERIAL PRIMARY KEY,
+    uuid          UUID PRIMARY KEY,
     id_with_file  BIGSERIAL,
     name          TEXT,
     poster_path   TEXT,
     backdrop_path TEXT
 );
+
 CREATE TABLE movies_collections
 (
-    movie_id      BIGSERIAL NOT NULL REFERENCES movies (id),
-    collection_id BIGSERIAL NOT NULL REFERENCES collections (id)
+    movie_uuid      UUID NOT NULL REFERENCES movies (uuid),
+    collection_uuid UUID NOT NULL REFERENCES collections (uuid)
 );
 
 CREATE TABLE companies
 (
-    id           BIGSERIAL PRIMARY KEY,
+    uuid         UUID PRIMARY KEY,
     id_with_file BIGSERIAL,
     name         TEXT
 );
+
 CREATE TABLE movies_companies
 (
-    movie_id   BIGSERIAL NOT NULL REFERENCES movies (id),
-    company_id BIGSERIAL NOT NULL REFERENCES companies (id)
+    movie_uuid   UUID NOT NULL REFERENCES movies (uuid),
+    company_uuid UUID NOT NULL REFERENCES companies (uuid)
 );
 
 CREATE TABLE countries
 (
-    id         BIGSERIAL PRIMARY KEY,
+    uuid       UUID PRIMARY KEY,
     iso_3166_1 TEXT,
     name       TEXT
 );
+
 CREATE TABLE movies_countries
 (
-    movie_id   BIGSERIAL NOT NULL REFERENCES movies (id),
-    country_id BIGSERIAL NOT NULL REFERENCES countries (id)
+    movie_uuid   UUID NOT NULL REFERENCES movies (uuid),
+    country_uuid UUID NOT NULL REFERENCES countries (uuid)
 );
 
 CREATE TABLE genres
 (
-    id           BIGSERIAL PRIMARY KEY,
+    uuid         UUID PRIMARY KEY,
     id_with_file BIGSERIAL,
     name         TEXT
 );
+
 CREATE TABLE movies_genres
 (
-    movie_id BIGSERIAL NOT NULL REFERENCES movies (id),
-    genre_id BIGSERIAL NOT NULL REFERENCES genres (id)
+    movie_uuid UUID NOT NULL REFERENCES movies (uuid),
+    genre_uuid UUID NOT NULL REFERENCES genres (uuid)
 );
 
 CREATE TABLE languages
 (
-    id        BIGSERIAL PRIMARY KEY,
+    uuid      UUID PRIMARY KEY,
     iso_639_1 TEXT,
     name      TEXT
 );
+
 CREATE TABLE movies_languages
 (
-    movie_id    BIGSERIAL NOT NULL REFERENCES movies (id),
-    language_id BIGSERIAL NOT NULL REFERENCES languages (id)
+    movie_uuid    UUID NOT NULL REFERENCES movies (uuid),
+    language_uuid UUID NOT NULL REFERENCES languages (uuid)
 );

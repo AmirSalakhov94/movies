@@ -7,6 +7,7 @@ import tech.itpark.repository.MovieCollectionRepository;
 
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 
 @RequiredArgsConstructor
 @Service
@@ -20,7 +21,7 @@ public class MovieCollectionServiceImpl implements MovieCollectionService {
     }
 
     @Override
-    public CollectionDto getCollection(long id) {
+    public CollectionDto getCollection(UUID uuid) {
         return null;
     }
 

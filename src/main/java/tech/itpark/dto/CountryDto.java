@@ -3,6 +3,7 @@ package tech.itpark.dto;
 import com.google.gson.annotations.SerializedName;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 import java.util.UUID;
@@ -12,7 +13,8 @@ import java.util.UUID;
 @AllArgsConstructor
 public class CountryDto {
 
-    private UUID id;
+    @EqualsAndHashCode.Exclude
+    private UUID uuid;
     @SerializedName("iso_3166_1")
     private String iso3166;
     private String name;
