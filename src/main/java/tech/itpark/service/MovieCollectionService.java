@@ -12,5 +12,5 @@ public interface MovieCollectionService {
 
     CollectionDto getCollection(final UUID uuid);
 
-    Set<Long> save(Set<CollectionDto> collections);
+    List<UUID> save(final Set<CollectionDto> collections);
 }

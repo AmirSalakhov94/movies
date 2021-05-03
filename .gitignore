@@ -26,3 +26,7 @@
 /.nb-gradle/
 /apache-tomcat-10.0.5/
 /.idea/
+
+/src/test/resources/.~lock.movies45000.csv#
+/src/test/resources/movies45000.csv
+/src/test/resources/tmdb_5000_movies.csv

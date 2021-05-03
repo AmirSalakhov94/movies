@@ -12,5 +12,5 @@ public interface MovieGenreService {
 
     GenreDto getGenre(final UUID uuid);
 
-    void save(Set<GenreDto> genres);
+    List<UUID> save(final Set<GenreDto> genres);
 }

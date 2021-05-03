@@ -3,6 +3,7 @@ package tech.itpark.service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import tech.itpark.dto.GenreDto;
+import tech.itpark.mapper.GenreMapper;
 import tech.itpark.repository.MovieGenreRepository;
 
 import java.util.List;
@@ -13,20 +14,23 @@ import java.util.UUID;
 @Service
 public class MovieGenreServiceImpl implements MovieGenreService {
 
+    private final GenreMapper mapper;
     private final MovieGenreRepository repository;
 
     @Override
     public List<GenreDto> getGeneres() {
-        return null;
+        return mapper.fromEntities(repository.findAll());
     }
 
     @Override
-    public GenreDto getGenre(UUID uuid) {
-        return null;
+    public GenreDto getGenre(final UUID uuid) {
+        return repository.findByUuid(uuid)
+                .map(mapper::fromEntity)
+                .orElse(null);
     }
 
     @Override
-    public void save(Set<GenreDto> genres) {
-
+    public List<UUID> save(final Set<GenreDto> genres) {
+        return repository.save(mapper.fromDtos(genres), 500);
     }
 }

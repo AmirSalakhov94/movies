@@ -23,7 +23,7 @@ public class FileUploaderServiceImpl implements FileUploaderService {
     private final MovieService movieService;
 
     @Override
-    public void upload(MultipartFile multipartFile) {
+    public void upload(final MultipartFile multipartFile) {
         try {
             InputStreamReader inputStreamReader =
                     new InputStreamReader(multipartFile.getInputStream(), StandardCharsets.UTF_8);

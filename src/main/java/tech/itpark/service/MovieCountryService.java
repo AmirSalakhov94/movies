@@ -4,12 +4,13 @@ import tech.itpark.dto.CountryDto;
 
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 
 public interface MovieCountryService {
 
     List<CountryDto> getCountries();
 
-    CountryDto getCountry(final long id);
+    CountryDto getCountry(final UUID uuid);
 
-    void save(Set<CountryDto> countries);
+    List<UUID> save(final Set<CountryDto> countries);
 }

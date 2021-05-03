@@ -1,6 +1,15 @@
+CREATE TABLE collections
+(
+    uuid          UUID NOT NULL PRIMARY KEY,
+    id_with_file  BIGSERIAL,
+    name          TEXT,
+    poster_path   TEXT,
+    backdrop_path TEXT
+);
+
 CREATE TABLE movies
 (
-    uuid              UUID PRIMARY KEY,
+    uuid              UUID NOT NULL PRIMARY KEY,
     id_with_file      BIGSERIAL,
     is_adult          BOOLEAN,
     budget            BIGSERIAL,
@@ -19,27 +28,13 @@ CREATE TABLE movies
     title             TEXT,
     is_video          BOOLEAN,
     vote_average      REAL,
-    vote_count        BIGSERIAL
-);
-
-CREATE TABLE collections
-(
-    uuid          UUID PRIMARY KEY,
-    id_with_file  BIGSERIAL,
-    name          TEXT,
-    poster_path   TEXT,
-    backdrop_path TEXT
-);
-
-CREATE TABLE movies_collections
-(
-    movie_uuid      UUID NOT NULL REFERENCES movies (uuid),
-    collection_uuid UUID NOT NULL REFERENCES collections (uuid)
+    vote_count        BIGSERIAL,
+    collection_uuid   UUID REFERENCES collections (uuid)
 );
 
 CREATE TABLE companies
 (
-    uuid         UUID PRIMARY KEY,
+    uuid         UUID NOT NULL PRIMARY KEY,
     id_with_file BIGSERIAL,
     name         TEXT
 );
@@ -52,7 +47,7 @@ CREATE TABLE movies_companies
 
 CREATE TABLE countries
 (
-    uuid       UUID PRIMARY KEY,
+    uuid       UUID NOT NULL PRIMARY KEY,
     iso_3166_1 TEXT,
     name       TEXT
 );
@@ -65,7 +60,7 @@ CREATE TABLE movies_countries
 
 CREATE TABLE genres
 (
-    uuid         UUID PRIMARY KEY,
+    uuid         UUID NOT NULL PRIMARY KEY,
     id_with_file BIGSERIAL,
     name         TEXT
 );
@@ -78,7 +73,7 @@ CREATE TABLE movies_genres
 
 CREATE TABLE languages
 (
-    uuid      UUID PRIMARY KEY,
+    uuid      UUID NOT NULL PRIMARY KEY,
     iso_639_1 TEXT,
     name      TEXT
 );

@@ -16,6 +16,6 @@ public class LanguageDto {
     @EqualsAndHashCode.Exclude
     private UUID uuid;
     @SerializedName("iso_639_1")
-    private String iso639;
+    private String iso6391;
     private String name;
 }

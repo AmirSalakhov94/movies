@@ -3,6 +3,7 @@ package tech.itpark.service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import tech.itpark.dto.CollectionDto;
+import tech.itpark.mapper.CollectionMapper;
 import tech.itpark.repository.MovieCollectionRepository;
 
 import java.util.List;
@@ -13,20 +14,23 @@ import java.util.UUID;
 @Service
 public class MovieCollectionServiceImpl implements MovieCollectionService {
 
+    private final CollectionMapper mapper;
     private final MovieCollectionRepository repository;
 
     @Override
     public List<CollectionDto> getCollections() {
-        return null;
+        return mapper.fromEntities(repository.findAll());
     }
 
     @Override
-    public CollectionDto getCollection(UUID uuid) {
-        return null;
+    public CollectionDto getCollection(final UUID uuid) {
+        return repository.findByUuid(uuid)
+                .map(mapper::fromEntity)
+                .orElse(null);
     }
 
     @Override
-    public Set<Long> save(Set<CollectionDto> collections) {
-        return null;
+    public List<UUID> save(final Set<CollectionDto> collections) {
+        return repository.save(mapper.fromDtos(collections), 500);
     }
 }

@@ -16,6 +16,6 @@ public class CountryDto {
     @EqualsAndHashCode.Exclude
     private UUID uuid;
     @SerializedName("iso_3166_1")
-    private String iso3166;
+    private String iso31661;
     private String name;
 }

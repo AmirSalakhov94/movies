@@ -15,7 +15,7 @@ public interface MovieService {
 
     MovieDto getMovie(final UUID uuid);
 
-    List<PreviewMovieDto> topMoviesByGenre(final UUID genreUuid);
+    List<PreviewMovieDto> topMoviesByGenre(final UUID genreUuid, final int count);
 
     List<PreviewMovieDto> moviesByCompany(final UUID companyUuid);
 

@@ -37,7 +37,7 @@ public class MovieController {
 
     @GetMapping("/genre/{genreUuid}")
     public List<PreviewMovieDto> topMoviesByGenre(@PathVariable("genreUuid") UUID genreUuid) {
-        return movieService.topMoviesByGenre(genreUuid);
+        return movieService.topMoviesByGenre(genreUuid, 20);
     }
 
     @GetMapping("/company/{companyUuid}")
