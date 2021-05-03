@@ -15,10 +15,10 @@ public class MovieDto {
 
     @EqualsAndHashCode.Exclude
     private UUID uuid;
-    private Boolean adult;
-    private Long idWithFile;
+    private boolean adult;
+    private long idWithFile;
     private String imdbId;
-    private Long budget;
+    private long budget;
     private CollectionDto collection;
     private List<GenreDto> genres;
     private String homepage;
@@ -26,17 +26,17 @@ public class MovieDto {
     private String originalTitle;
     private String posterPath;
     private String overview;
-    private Float popularity;
+    private float popularity;
     private List<CompanyDto> companies;
     private List<CountryDto> countries;
     private LocalDate releaseDate;
-    private Long revenue;
-    private Float runtime;
+    private long revenue;
+    private float runtime;
     private List<LanguageDto> languages;
     private Status status;
     private String tagline;
     private String title;
-    private Boolean video;
-    private Float voteAverage;
-    private Long voteCount;
+    private boolean video;
+    private float voteAverage;
+    private long voteCount;
 }

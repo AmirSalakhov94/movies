@@ -23,12 +23,12 @@ public class MovieServiceImpl implements MovieService {
 
     @Override
     public List<PreviewMovieDto> topMovies(final int count) {
-        return null;
+        return previewMovieMapper.fromEntities(repository.findTopMovies(count));
     }
 
     @Override
     public List<PreviewMovieDto> getMovies(final Pageable pageable) {
-        return null;
+        return previewMovieMapper.fromEntities(repository.findAll(pageable.getOffset(), pageable.getNum()));
     }
 
     @Override
@@ -45,12 +45,12 @@ public class MovieServiceImpl implements MovieService {
 
     @Override
     public List<PreviewMovieDto> moviesByCompany(final UUID companyUuid) {
-        return null;
+        return previewMovieMapper.fromEntities(repository.moviesByCompany(companyUuid));
     }
 
     @Override
     public List<UUID> save(List<MovieDto> movies) {
         List<MovieEntity> movieEntities = movieMapper.fromDtos(movies);
-        return repository.save(movieEntities, 500);
+        return repository.save(movieEntities, 1000);
     }
 }

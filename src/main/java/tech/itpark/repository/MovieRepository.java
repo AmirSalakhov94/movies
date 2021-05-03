@@ -11,6 +11,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
@@ -52,34 +53,33 @@ public class MovieRepository {
 
                     CollectionEntity collection = movieEntity.getCollection();
                     if (collection != null) {
-                        System.out.println(collection.getUuid() + "_" + collection.getName() + "_" + collection.getIdWithFile());
                         preparedStatement.setObject(++index, movieEntity.getCollection().getUuid(), Types.OTHER);
                     }
                 });
 
         movies.forEach(movie -> jdbcTemplate.batchUpdate("INSERT INTO movies_companies (movie_uuid, company_uuid)" +
-                " VALUES (?, ?)", movie.getCompanies(), movie.getCompanies().size(), ((preparedStatement, company) -> {
+                " VALUES (?, ?)", movie.getCompanies(), batchSize, ((preparedStatement, company) -> {
             int index = 0;
             preparedStatement.setObject(++index, movie.getUuid(), Types.OTHER);
             preparedStatement.setObject(++index, company.getUuid(), Types.OTHER);
         })));
 
         movies.forEach(movie -> jdbcTemplate.batchUpdate("INSERT INTO movies_countries (movie_uuid, country_uuid)" +
-                " VALUES (?, ?)", movie.getCountries(), movie.getCountries().size(), ((preparedStatement, country) -> {
+                " VALUES (?, ?)", movie.getCountries(), batchSize, ((preparedStatement, country) -> {
             int index = 0;
             preparedStatement.setObject(++index, movie.getUuid(), Types.OTHER);
             preparedStatement.setObject(++index, country.getUuid(), Types.OTHER);
         })));
 
         movies.forEach(movie -> jdbcTemplate.batchUpdate("INSERT INTO movies_genres (movie_uuid, genre_uuid)" +
-                " VALUES (?, ?)", movie.getGenres(), movie.getGenres().size(), ((preparedStatement, genre) -> {
+                " VALUES (?, ?)", movie.getGenres(), batchSize, ((preparedStatement, genre) -> {
             int index = 0;
             preparedStatement.setObject(++index, movie.getUuid(), Types.OTHER);
             preparedStatement.setObject(++index, genre.getUuid(), Types.OTHER);
         })));
 
         movies.forEach(movie -> jdbcTemplate.batchUpdate("INSERT INTO movies_languages (movie_uuid, language_uuid)" +
-                " VALUES (?, ?)", movie.getLanguages(), movie.getLanguages().size(), ((preparedStatement, language) -> {
+                " VALUES (?, ?)", movie.getLanguages(), batchSize, ((preparedStatement, language) -> {
             int index = 0;
             preparedStatement.setObject(++index, movie.getUuid(), Types.OTHER);
             preparedStatement.setObject(++index, language.getUuid(), Types.OTHER);
@@ -185,20 +185,74 @@ public class MovieRepository {
     }
 
     public List<PreviewMovieEntity> findTopMoviesByGenre(final UUID genreUuid, final int count) {
-        return jdbcTemplate.query("SELECT * FROM movies " +
-                        "JOIN movies_genres mg on movies.uuid = mg.movie_uuid " +
+        return jdbcTemplate.query("SELECT m.uuid, m.homepage, m.original_title, m.poster_path, " +
+                        "m.vote_average, m.vote_count, g.name FROM movies m " +
+                        "JOIN movies_genres mg on m.uuid = mg.movie_uuid " +
                         "JOIN genres g on g.uuid = mg.genre_uuid " +
-                        "WHERE genre_uuid = ? ORDER BY vote_average DESC LIMIT ?;",
+                        "WHERE g.uuid = ? ORDER BY m.vote_average DESC LIMIT ?;",
                 (rs, i) -> {
                     PreviewMovieEntity previewMovie = new PreviewMovieEntity();
                     previewMovie.setUuid(rs.getObject("uuid", UUID.class));
                     previewMovie.setHomepage(rs.getString("homepage"));
                     previewMovie.setOriginalTitle(rs.getString("original_title"));
                     previewMovie.setPosterPath(rs.getString("poster_path"));
+                    previewMovie.setVoteAverage(rs.getFloat("vote_average"));
+                    previewMovie.setVoteCount(rs.getLong("vote_count"));
                     previewMovie.setGenre(rs.getString("name"));
+                    return previewMovie;
+                }, genreUuid, count);
+    }
+
+    public List<PreviewMovieEntity> moviesByCompany(final UUID companyUuid) {
+        return jdbcTemplate.query("SELECT m.uuid, m.homepage, m.original_title, m.poster_path, " +
+                        "m.vote_average, m.vote_count, c.name FROM movies m " +
+                        "JOIN movies_companies mc on m.uuid = mc.movie_uuid " +
+                        "JOIN companies c on c.uuid = mc.company_uuid " +
+                        "WHERE c.uuid = ? ORDER BY m.release_date DESC LIMIT ?;",
+                (rs, i) -> {
+                    PreviewMovieEntity previewMovie = new PreviewMovieEntity();
+                    previewMovie.setUuid(rs.getObject("uuid", UUID.class));
+                    previewMovie.setHomepage(rs.getString("homepage"));
+                    previewMovie.setOriginalTitle(rs.getString("original_title"));
+                    previewMovie.setPosterPath(rs.getString("poster_path"));
+                    previewMovie.setVoteAverage(rs.getFloat("vote_average"));
+                    previewMovie.setVoteCount(rs.getLong("vote_count"));
+                    previewMovie.setCompany(rs.getString("name"));
+                    return previewMovie;
+                }, companyUuid);
+    }
+
+    public List<PreviewMovieEntity> findTopMovies(final int count) {
+        return jdbcTemplate.query("SELECT m.uuid, m.homepage, m.original_title, m.poster_path, " +
+                        "m.vote_average, m.vote_count, g.name FROM movies m " +
+                        "JOIN movies_genres mg on m.uuid = mg.movie_uuid " +
+                        "JOIN genres g on g.uuid = mg.genre_uuid " +
+                        "WHERE g.uuid = ? ORDER BY m.vote_average DESC LIMIT ?;",
+                (rs, i) -> {
+                    PreviewMovieEntity previewMovie = new PreviewMovieEntity();
+                    previewMovie.setUuid(rs.getObject("uuid", UUID.class));
+                    previewMovie.setHomepage(rs.getString("homepage"));
+                    previewMovie.setOriginalTitle(rs.getString("original_title"));
+                    previewMovie.setPosterPath(rs.getString("poster_path"));
+                    previewMovie.setVoteAverage(rs.getFloat("vote_average"));
+                    previewMovie.setVoteCount(rs.getLong("vote_count"));
+                    previewMovie.setGenre(rs.getString("name"));
+                    return previewMovie;
+                }, count);
+    }
+
+    public List<PreviewMovieEntity> findAll(final int offset, final int num) {
+        return jdbcTemplate.query("SELECT m.uuid, m.homepage, m.original_title, m.poster_path, " +
+                        "m.vote_average, m.vote_count FROM movies m ORDER BY m.vote_average DESC OFFSET ? LIMIT ?",
+                (rs, i) -> {
+                    PreviewMovieEntity previewMovie = new PreviewMovieEntity();
+                    previewMovie.setUuid(rs.getObject("uuid", UUID.class));
+                    previewMovie.setHomepage(rs.getString("homepage"));
+                    previewMovie.setOriginalTitle(rs.getString("original_title"));
+                    previewMovie.setPosterPath(rs.getString("poster_path"));
                     previewMovie.setVoteAverage(rs.getFloat("vote_average"));
                     previewMovie.setVoteCount(rs.getLong("vote_count"));
                     return previewMovie;
-                }, genreUuid, count);
+                }, offset, num);
     }
 }

@@ -26,7 +26,7 @@ public class MovieController {
     }
 
     @GetMapping("/all")
-    public List<PreviewMovieDto> movies(Pageable pageable) {
+    public List<PreviewMovieDto> movies(@ModelAttribute("pageable") Pageable pageable) {
         return movieService.getMovies(pageable);
     }
 

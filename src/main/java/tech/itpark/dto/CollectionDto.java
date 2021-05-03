@@ -16,7 +16,7 @@ public class CollectionDto {
     @EqualsAndHashCode.Exclude
     private UUID uuid;
     @SerializedName("id")
-    private Long idWithFile;
+    private long idWithFile;
     private String name;
     @SerializedName("poster_path")
     private String posterPath;

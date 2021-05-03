@@ -16,6 +16,6 @@ public class CompanyDto {
     @EqualsAndHashCode.Exclude
     private UUID uuid;
     @SerializedName("id")
-    private Long idWithFile;
+    private long idWithFile;
     private String name;
 }

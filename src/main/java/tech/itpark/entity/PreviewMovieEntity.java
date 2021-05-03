@@ -16,6 +16,7 @@ public class PreviewMovieEntity {
     private String homepage;
     private String posterPath;
     private String genre;
-    private Float voteAverage;
-    private Long voteCount;
+    private String company;
+    private float voteAverage;
+    private long voteCount;
 }

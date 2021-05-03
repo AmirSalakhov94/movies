@@ -15,6 +15,6 @@ public class PreviewMovieDto {
     private String originalTitle;
     private String homepage;
     private String posterPath;
-    private Float voteAverage;
-    private Long voteCount;
+    private float voteAverage;
+    private long voteCount;
 }

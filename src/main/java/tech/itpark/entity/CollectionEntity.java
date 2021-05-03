@@ -12,7 +12,7 @@ import java.util.UUID;
 public class CollectionEntity {
 
     private UUID uuid;
-    private Long idWithFile;
+    private long idWithFile;
     private String name;
     private String posterPath;
     private String backdropPath;
