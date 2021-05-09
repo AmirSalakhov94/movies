@@ -53,4 +53,9 @@ public class MovieServiceImpl implements MovieService {
         List<MovieEntity> movieEntities = movieMapper.fromDtos(movies);
         return repository.save(movieEntities, 1000);
     }
+
+    @Override
+    public List<PreviewMovieDto> moviesByCollection(UUID collectionUuid) {
+        return previewMovieMapper.fromEntities(repository.moviesByCollection(collectionUuid));
+    }
 }

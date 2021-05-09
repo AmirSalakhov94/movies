@@ -20,4 +20,6 @@ public interface MovieService {
     List<PreviewMovieDto> moviesByCompany(final UUID companyUuid);
 
     List<UUID> save(final List<MovieDto> movies);
+
+    List<PreviewMovieDto> moviesByCollection(final UUID collectionUuid);
 }

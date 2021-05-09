@@ -1,6 +1,7 @@
 package tech.itpark.service;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import tech.itpark.dto.CountryDto;
 import tech.itpark.mapper.CountryMapper;
@@ -29,8 +30,9 @@ public class MovieCountryServiceImpl implements MovieCountryService {
                 .orElse(null);
     }
 
+    @Async
     @Override
     public List<UUID> save(final Set<CountryDto> countries) {
-        return repository.save(mapper.fromDtos(countries), 500);
+        return repository.save(mapper.fromDtos(countries), 3000);
     }
 }

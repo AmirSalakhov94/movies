@@ -22,7 +22,7 @@ import java.util.stream.Collectors;
 @Service
 public class OpenCsvParser implements Parser<CsvParserData> {
 
-    private final Gson gson;
+    private final Gson gson = new Gson();
 
     @Override
     public CsvParserData parse(File file) {
@@ -84,10 +84,10 @@ public class OpenCsvParser implements Parser<CsvParserData> {
                                     UUID uuid = collectionMap.get(collection);
                                     if (uuid == null) {
                                         uuid = UUID.randomUUID();
-                                        movieDtoBuilder.collection(collection);
+                                        collectionMap.put(collection, uuid);
                                     }
                                     collection.setUuid(uuid);
-                                    collectionMap.put(collection, uuid);
+                                    movieDtoBuilder.collection(collection);
                                 });
 
                         Optional.ofNullable(csvData.getGenres())

@@ -1,5 +1,6 @@
 package tech.itpark.dto;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.*;
 import tech.itpark.dto.enums.Status;
 
@@ -29,6 +30,7 @@ public class MovieDto {
     private float popularity;
     private List<CompanyDto> companies;
     private List<CountryDto> countries;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private LocalDate releaseDate;
     private long revenue;
     private float runtime;

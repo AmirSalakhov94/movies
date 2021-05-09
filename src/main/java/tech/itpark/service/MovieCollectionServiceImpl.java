@@ -1,6 +1,7 @@
 package tech.itpark.service;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import tech.itpark.dto.CollectionDto;
 import tech.itpark.mapper.CollectionMapper;
@@ -29,8 +30,9 @@ public class MovieCollectionServiceImpl implements MovieCollectionService {
                 .orElse(null);
     }
 
+    @Async
     @Override
     public List<UUID> save(final Set<CollectionDto> collections) {
-        return repository.save(mapper.fromDtos(collections), 500);
+        return repository.save(mapper.fromDtos(collections), 3000);
     }
 }

@@ -25,9 +25,7 @@ public class FileUploaderServiceImpl implements FileUploaderService {
     @Override
     public void upload(final MultipartFile multipartFile) {
         try {
-            InputStreamReader inputStreamReader =
-                    new InputStreamReader(multipartFile.getInputStream(), StandardCharsets.UTF_8);
-            CsvParserData parse = parser.parse(inputStreamReader);
+            CsvParserData parse = parser.parse(new InputStreamReader(multipartFile.getInputStream(), StandardCharsets.UTF_8));
             movieCollectionService.save(parse.getCollections());
             movieCountryService.save(parse.getCountries());
             movieGenreService.save(parse.getGenres());

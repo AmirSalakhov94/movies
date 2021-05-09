@@ -35,6 +35,11 @@ public class MovieController {
         return movieService.getMovie(uuid);
     }
 
+    @GetMapping("/collection/{collectionUuid}")
+    public List<PreviewMovieDto> moviesByCollection(@PathVariable("collectionUuid") UUID collectionUuid) {
+        return movieService.moviesByCollection(collectionUuid);
+    }
+
     @GetMapping("/genre/{genreUuid}")
     public List<PreviewMovieDto> topMoviesByGenre(@PathVariable("genreUuid") UUID genreUuid) {
         return movieService.topMoviesByGenre(genreUuid, 20);

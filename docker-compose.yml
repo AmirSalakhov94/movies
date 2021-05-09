@@ -20,4 +20,4 @@ services:
       - POSTGRES_USER=app
       - POSTGRES_PASSWORD=pass
     volumes:
-      - ./docker-entrypoint-init:/docker-entrypoint-initdb.d:ro
+      - ./docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d:ro

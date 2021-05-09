@@ -1,6 +1,7 @@
 package tech.itpark.service;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import tech.itpark.dto.LanguageDto;
 import tech.itpark.mapper.LanguageMapper;
@@ -29,8 +30,9 @@ public class MovieLanguageServiceImpl implements MovieLanguageService {
                 .orElse(null);
     }
 
+    @Async
     @Override
     public List<UUID> save(Set<LanguageDto> languages) {
-        return repository.save(mapper.fromDtos(languages), 500);
+        return repository.save(mapper.fromDtos(languages), 3000);
     }
 }

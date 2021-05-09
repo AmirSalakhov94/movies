@@ -1,10 +1,8 @@
 package tech.itpark.service;
 
 
-import com.google.gson.Gson;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
 import tech.itpark.dto.CsvParserData;
 import tech.itpark.service.parser.OpenCsvParser;
 
@@ -17,9 +15,6 @@ class OpenCsvParserTest {
 
     private static File FILE;
 
-    @Autowired
-    Gson gson;
-
     @BeforeAll
     static void beforeAll() {
         URL url = OpenCsvParserTest.class.getResource("/movies45000.csv");
@@ -28,7 +23,7 @@ class OpenCsvParserTest {
 
     @Test
     void testParseCSV() {
-        OpenCsvParser csvParser = new OpenCsvParser(gson);
+        OpenCsvParser csvParser = new OpenCsvParser();
         CsvParserData parse = csvParser.parse(FILE);
         assertNotNull(parse);
     }

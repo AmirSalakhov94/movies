@@ -1,6 +1,7 @@
 package tech.itpark.service;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import tech.itpark.dto.GenreDto;
 import tech.itpark.mapper.GenreMapper;
@@ -29,8 +30,9 @@ public class MovieGenreServiceImpl implements MovieGenreService {
                 .orElse(null);
     }
 
+    @Async
     @Override
     public List<UUID> save(final Set<GenreDto> genres) {
-        return repository.save(mapper.fromDtos(genres), 500);
+        return repository.save(mapper.fromDtos(genres), 3000);
     }
 }

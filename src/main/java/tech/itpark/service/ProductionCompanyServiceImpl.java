@@ -31,6 +31,6 @@ public class ProductionCompanyServiceImpl implements ProductionCompanyService {
 
     @Override
     public void save(final Set<CompanyDto> companies) {
-        repository.save(mapper.fromDtos(companies), 500);
+        repository.save(mapper.fromDtos(companies), 3000);
     }
 }
