@@ -1,6 +1,9 @@
 package tech.itpark.repository;
 
 import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
+import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 import tech.itpark.dto.enums.Status;
@@ -9,6 +12,7 @@ import tech.itpark.entity.*;
 import java.sql.Types;
 import java.util.*;
 import java.util.concurrent.Callable;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
@@ -19,9 +23,26 @@ public class MovieRepository {
 
     private final JdbcTemplate jdbcTemplate;
 
+    @SneakyThrows
     public List<UUID> save(final List<MovieEntity> movies, final int batchSize) {
         if (movies == null || movies.isEmpty())
             return Collections.emptyList();
+
+        List<Pair<UUID, UUID>> companiesPair = new ArrayList<>();
+        List<Pair<UUID, UUID>> countriesPair = new ArrayList<>();
+        List<Pair<UUID, UUID>> genresPair = new ArrayList<>();
+        List<Pair<UUID, UUID>> languagesPair = new ArrayList<>();
+
+        CompletableFuture<Boolean> future = CompletableFuture.supplyAsync(() -> {
+            movies.forEach(m -> {
+                m.getCompanies().forEach(c -> companiesPair.add(ImmutablePair.of(m.getUuid(), c.getUuid())));
+                m.getCountries().forEach(c -> countriesPair.add(ImmutablePair.of(m.getUuid(), c.getUuid())));
+                m.getGenres().forEach(g -> genresPair.add(ImmutablePair.of(m.getUuid(), g.getUuid())));
+                m.getLanguages().forEach(l -> languagesPair.add(ImmutablePair.of(m.getUuid(), l.getUuid())));
+            });
+
+            return true;
+        });
 
         jdbcTemplate.batchUpdate("INSERT INTO movies (uuid, id_with_file, is_adult, budget," +
                         " imdb_id, homepage, original_language, original_title, poster_path, overview, popularity, release_date," +
@@ -58,52 +79,52 @@ public class MovieRepository {
                     }
                 });
 
-        ExecutorService worker = Executors.newFixedThreadPool(5);
-        List<Callable<Boolean>> callables = Arrays.asList(
-                () -> {
-                    movies.forEach(movie -> jdbcTemplate.batchUpdate("INSERT INTO movies_companies (movie_uuid, company_uuid)" +
-                            " VALUES (?, ?)", movie.getCompanies(), movie.getCompanies().size(), ((preparedStatement, company) -> {
-                        int index = 0;
-                        preparedStatement.setObject(++index, movie.getUuid(), Types.OTHER);
-                        preparedStatement.setObject(++index, company.getUuid(), Types.OTHER);
-                    })));
+        if (Boolean.TRUE.equals(future.get())) {
+            ExecutorService worker = Executors.newFixedThreadPool(4);
+            List<Callable<Boolean>> callables = Arrays.asList(
+                    () -> {
+                        jdbcTemplate.batchUpdate("INSERT INTO movies_companies (movie_uuid, company_uuid)" +
+                                " VALUES (?, ?)", companiesPair, batchSize, ((preparedStatement, pair) -> {
+                            int index = 0;
+                            preparedStatement.setObject(++index, pair.getLeft(), Types.OTHER);
+                            preparedStatement.setObject(++index, pair.getRight(), Types.OTHER);
+                        }));
 
-                    return true;
-                },
-                () -> {
-                    movies.forEach(movie -> jdbcTemplate.batchUpdate("INSERT INTO movies_countries (movie_uuid, country_uuid)" +
-                            " VALUES (?, ?)", movie.getCountries(), movie.getCountries().size(), ((preparedStatement, country) -> {
-                        int index = 0;
-                        preparedStatement.setObject(++index, movie.getUuid(), Types.OTHER);
-                        preparedStatement.setObject(++index, country.getUuid(), Types.OTHER);
-                    })));
+                        return true;
+                    },
+                    () -> {
+                        jdbcTemplate.batchUpdate("INSERT INTO movies_countries (movie_uuid, country_uuid)" +
+                                " VALUES (?, ?)", countriesPair, batchSize, ((preparedStatement, pair) -> {
+                            int index = 0;
+                            preparedStatement.setObject(++index, pair.getLeft(), Types.OTHER);
+                            preparedStatement.setObject(++index, pair.getRight(), Types.OTHER);
+                        }));
 
-                    return true;
-                },
-                () -> {
-                    movies.forEach(movie -> jdbcTemplate.batchUpdate("INSERT INTO movies_genres (movie_uuid, genre_uuid)" +
-                            " VALUES (?, ?)", movie.getGenres(), movie.getGenres().size(), ((preparedStatement, genre) -> {
-                        int index = 0;
-                        preparedStatement.setString(++index, movie.getUuid().toString());
-                        preparedStatement.setObject(++index, genre.getUuid().toString());
-                    })));
-                    return true;
-                },
-                () -> {
-                    movies.forEach(movie -> jdbcTemplate.batchUpdate("INSERT INTO movies_languages (movie_uuid, language_uuid)" +
-                            " VALUES (?, ?)", movie.getLanguages(), movie.getLanguages().size(), ((preparedStatement, language) -> {
-                        int index = 0;
-                        preparedStatement.setObject(++index, movie.getUuid(), Types.OTHER);
-                        preparedStatement.setObject(++index, language.getUuid(), Types.OTHER);
-                    })));
-                    return true;
-                }
-        );
+                        return true;
+                    },
+                    () -> {
+                        jdbcTemplate.batchUpdate("INSERT INTO movies_genres (movie_uuid, genre_uuid)" +
+                                " VALUES (?, ?)", genresPair, batchSize, ((preparedStatement, pair) -> {
+                            int index = 0;
+                            preparedStatement.setObject(++index, pair.getLeft(), Types.OTHER);
+                            preparedStatement.setObject(++index, pair.getRight(), Types.OTHER);
+                        }));
 
-        try {
+                        return true;
+                    },
+                    () -> {
+                        jdbcTemplate.batchUpdate("INSERT INTO movies_languages (movie_uuid, language_uuid)" +
+                                " VALUES (?, ?)", languagesPair, batchSize, ((preparedStatement, pair) -> {
+                            int index = 0;
+                            preparedStatement.setObject(++index, pair.getLeft(), Types.OTHER);
+                            preparedStatement.setObject(++index, pair.getRight(), Types.OTHER);
+                        }));
+
+                        return true;
+                    }
+            );
+
             worker.invokeAll(callables);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
         }
 
         return movies.stream().map(MovieEntity::getUuid).collect(Collectors.toList());
