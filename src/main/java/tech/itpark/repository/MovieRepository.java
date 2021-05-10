@@ -4,11 +4,14 @@ import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 import tech.itpark.dto.enums.Status;
 import tech.itpark.entity.*;
 
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.sql.Types;
 import java.util.*;
 import java.util.concurrent.Callable;
@@ -131,99 +134,103 @@ public class MovieRepository {
     }
 
     public Optional<MovieEntity> findByUuid(final UUID uuid) {
-        return Optional.ofNullable(jdbcTemplate.queryForObject("SELECT * FROM movies m" +
-                        " LEFT JOIN collections c on m.collection_uuid = c.uuid" +
-                        " WHERE m.uuid = ?",
-                (rs, i) -> {
-                    int index = 0;
-                    MovieEntity movieEntity = new MovieEntity();
-                    movieEntity.setUuid(rs.getObject(++index, UUID.class));
-                    movieEntity.setIdWithFile(rs.getLong(++index));
-                    movieEntity.setAdult(rs.getBoolean(++index));
-                    movieEntity.setBudget(rs.getLong(++index));
-                    movieEntity.setImdbId(rs.getString(++index));
-                    movieEntity.setHomepage(rs.getString(++index));
-                    movieEntity.setOriginalLanguage(rs.getString(++index));
-                    movieEntity.setOriginalTitle(rs.getString(++index));
-                    movieEntity.setPosterPath(rs.getString(++index));
-                    movieEntity.setOverview(rs.getString(++index));
-                    movieEntity.setPopularity(rs.getFloat(++index));
-                    movieEntity.setReleaseDate(rs.getDate(++index).toLocalDate());
-                    movieEntity.setRevenue(rs.getLong(++index));
-                    movieEntity.setRuntime(rs.getFloat(++index));
-                    movieEntity.setStatus(Status.valueOf(rs.getString(++index)));
-                    movieEntity.setTagline(rs.getString(++index));
-                    movieEntity.setTitle(rs.getString(++index));
-                    movieEntity.setVideo(rs.getBoolean(++index));
-                    movieEntity.setVoteAverage(rs.getFloat(++index));
-                    movieEntity.setVoteCount(rs.getLong(++index));
+        try {
+            return Optional.ofNullable(jdbcTemplate.queryForObject("SELECT * FROM movies m" +
+                            " LEFT JOIN collections c on m.collection_uuid = c.uuid" +
+                            " WHERE m.uuid = ?",
+                    (rs, i) -> {
+                        int index = 0;
+                        MovieEntity movieEntity = new MovieEntity();
+                        movieEntity.setUuid(rs.getObject(++index, UUID.class));
+                        movieEntity.setIdWithFile(rs.getLong(++index));
+                        movieEntity.setAdult(rs.getBoolean(++index));
+                        movieEntity.setBudget(rs.getLong(++index));
+                        movieEntity.setImdbId(rs.getString(++index));
+                        movieEntity.setHomepage(rs.getString(++index));
+                        movieEntity.setOriginalLanguage(rs.getString(++index));
+                        movieEntity.setOriginalTitle(rs.getString(++index));
+                        movieEntity.setPosterPath(rs.getString(++index));
+                        movieEntity.setOverview(rs.getString(++index));
+                        movieEntity.setPopularity(rs.getFloat(++index));
+                        movieEntity.setReleaseDate(rs.getDate(++index).toLocalDate());
+                        movieEntity.setRevenue(rs.getLong(++index));
+                        movieEntity.setRuntime(rs.getFloat(++index));
+                        movieEntity.setStatus(Status.valueOf(rs.getString(++index)));
+                        movieEntity.setTagline(rs.getString(++index));
+                        movieEntity.setTitle(rs.getString(++index));
+                        movieEntity.setVideo(rs.getBoolean(++index));
+                        movieEntity.setVoteAverage(rs.getFloat(++index));
+                        movieEntity.setVoteCount(rs.getLong(++index));
 
-                    ++index;
-                    CollectionEntity collectionEntity = new CollectionEntity();
-                    collectionEntity.setUuid(rs.getObject(++index, UUID.class));
-                    collectionEntity.setIdWithFile(rs.getLong(++index));
-                    collectionEntity.setName(rs.getString(++index));
-                    collectionEntity.setPosterPath(rs.getString(++index));
-                    collectionEntity.setBackdropPath(rs.getString(++index));
-                    movieEntity.setCollection(collectionEntity);
+                        ++index;
+                        CollectionEntity collectionEntity = new CollectionEntity();
+                        collectionEntity.setUuid(rs.getObject(++index, UUID.class));
+                        collectionEntity.setIdWithFile(rs.getLong(++index));
+                        collectionEntity.setName(rs.getString(++index));
+                        collectionEntity.setPosterPath(rs.getString(++index));
+                        collectionEntity.setBackdropPath(rs.getString(++index));
+                        movieEntity.setCollection(collectionEntity);
 
-                    return movieEntity;
-                }, uuid))
-                .map(movie -> {
-                    List<CompanyEntity> companies = jdbcTemplate.query("SELECT * FROM companies" +
-                                    " JOIN movies_companies mc ON companies.uuid = mc.company_uuid" +
-                                    " WHERE mc.movie_uuid = ?",
-                            (rs, i) -> {
-                                CompanyEntity company = new CompanyEntity();
-                                company.setUuid(rs.getObject("uuid", UUID.class));
-                                company.setIdWithFile(rs.getLong("id_with_file"));
-                                company.setName(rs.getString("name"));
+                        return movieEntity;
+                    }, uuid))
+                    .map(movie -> {
+                        List<CompanyEntity> companies = jdbcTemplate.query("SELECT * FROM companies" +
+                                        " JOIN movies_companies mc ON companies.uuid = mc.company_uuid" +
+                                        " WHERE mc.movie_uuid = ?",
+                                (rs, i) -> {
+                                    CompanyEntity company = new CompanyEntity();
+                                    company.setUuid(rs.getObject("uuid", UUID.class));
+                                    company.setIdWithFile(rs.getLong("id_with_file"));
+                                    company.setName(rs.getString("name"));
 
-                                return company;
-                            }, uuid);
-                    movie.setCompanies(companies);
+                                    return company;
+                                }, uuid);
+                        movie.setCompanies(companies);
 
-                    List<CountryEntity> countries = jdbcTemplate.query("SELECT * FROM countries" +
-                                    " JOIN movies_countries mc ON countries.uuid = mc.country_uuid" +
-                                    " WHERE mc.movie_uuid = ?",
-                            (rs, i) -> {
-                                CountryEntity country = new CountryEntity();
-                                country.setUuid(rs.getObject("uuid", UUID.class));
-                                country.setIso31661(rs.getString("iso_3166_1"));
-                                country.setName(rs.getString("name"));
+                        List<CountryEntity> countries = jdbcTemplate.query("SELECT * FROM countries" +
+                                        " JOIN movies_countries mc ON countries.uuid = mc.country_uuid" +
+                                        " WHERE mc.movie_uuid = ?",
+                                (rs, i) -> {
+                                    CountryEntity country = new CountryEntity();
+                                    country.setUuid(rs.getObject("uuid", UUID.class));
+                                    country.setIso31661(rs.getString("iso_3166_1"));
+                                    country.setName(rs.getString("name"));
 
-                                return country;
-                            }, uuid);
-                    movie.setCountries(countries);
+                                    return country;
+                                }, uuid);
+                        movie.setCountries(countries);
 
-                    List<GenreEntity> genres = jdbcTemplate.query("SELECT * FROM genres" +
-                                    " JOIN movies_genres mg ON genres.uuid = mg.genre_uuid" +
-                                    " WHERE mg.movie_uuid = ?",
-                            (rs, i) -> {
-                                GenreEntity genre = new GenreEntity();
-                                genre.setUuid(rs.getObject("uuid", UUID.class));
-                                genre.setIdWithFile(rs.getLong("id_with_file"));
-                                genre.setName(rs.getString("name"));
+                        List<GenreEntity> genres = jdbcTemplate.query("SELECT * FROM genres" +
+                                        " JOIN movies_genres mg ON genres.uuid = mg.genre_uuid" +
+                                        " WHERE mg.movie_uuid = ?",
+                                (rs, i) -> {
+                                    GenreEntity genre = new GenreEntity();
+                                    genre.setUuid(rs.getObject("uuid", UUID.class));
+                                    genre.setIdWithFile(rs.getLong("id_with_file"));
+                                    genre.setName(rs.getString("name"));
 
-                                return genre;
-                            }, uuid);
-                    movie.setGenres(genres);
+                                    return genre;
+                                }, uuid);
+                        movie.setGenres(genres);
 
-                    List<LanguageEntity> languages = jdbcTemplate.query("SELECT * FROM languages" +
-                                    " JOIN movies_languages mg ON languages.uuid = mg.language_uuid" +
-                                    " WHERE mg.movie_uuid = ?",
-                            (rs, i) -> {
-                                LanguageEntity language = new LanguageEntity();
-                                language.setUuid(rs.getObject("uuid", UUID.class));
-                                language.setIso6391(rs.getString("iso_639_1"));
-                                language.setName(rs.getString("name"));
+                        List<LanguageEntity> languages = jdbcTemplate.query("SELECT * FROM languages" +
+                                        " JOIN movies_languages mg ON languages.uuid = mg.language_uuid" +
+                                        " WHERE mg.movie_uuid = ?",
+                                (rs, i) -> {
+                                    LanguageEntity language = new LanguageEntity();
+                                    language.setUuid(rs.getObject("uuid", UUID.class));
+                                    language.setIso6391(rs.getString("iso_639_1"));
+                                    language.setName(rs.getString("name"));
 
-                                return language;
-                            }, uuid);
-                    movie.setLanguages(languages);
+                                    return language;
+                                }, uuid);
+                        movie.setLanguages(languages);
 
-                    return movie;
-                });
+                        return movie;
+                    });
+        } catch (EmptyResultDataAccessException ex) {
+            return Optional.empty();
+        }
     }
 
     public List<PreviewMovieEntity> findTopMoviesByGenre(final UUID genreUuid, final int count) {
@@ -233,13 +240,7 @@ public class MovieRepository {
                         "JOIN genres g on g.uuid = mg.genre_uuid " +
                         "WHERE g.uuid = ? ORDER BY m.vote_average DESC LIMIT ?",
                 (rs, i) -> {
-                    PreviewMovieEntity previewMovie = new PreviewMovieEntity();
-                    previewMovie.setUuid(rs.getObject("uuid", UUID.class));
-                    previewMovie.setHomepage(rs.getString("homepage"));
-                    previewMovie.setOriginalTitle(rs.getString("original_title"));
-                    previewMovie.setPosterPath(rs.getString("poster_path"));
-                    previewMovie.setVoteAverage(rs.getFloat("vote_average"));
-                    previewMovie.setVoteCount(rs.getLong("vote_count"));
+                    PreviewMovieEntity previewMovie = fillPreviewMovieByResultSet(rs, i);
                     previewMovie.setGenre(rs.getString("name"));
                     return previewMovie;
                 }, genreUuid, count);
@@ -252,13 +253,7 @@ public class MovieRepository {
                         "JOIN companies c on c.uuid = mc.company_uuid " +
                         "WHERE c.uuid = ? ORDER BY m.release_date DESC LIMIT ?",
                 (rs, i) -> {
-                    PreviewMovieEntity previewMovie = new PreviewMovieEntity();
-                    previewMovie.setUuid(rs.getObject("uuid", UUID.class));
-                    previewMovie.setHomepage(rs.getString("homepage"));
-                    previewMovie.setOriginalTitle(rs.getString("original_title"));
-                    previewMovie.setPosterPath(rs.getString("poster_path"));
-                    previewMovie.setVoteAverage(rs.getFloat("vote_average"));
-                    previewMovie.setVoteCount(rs.getLong("vote_count"));
+                    PreviewMovieEntity previewMovie = fillPreviewMovieByResultSet(rs, i);
                     previewMovie.setCompany(rs.getString("name"));
                     return previewMovie;
                 }, companyUuid);
@@ -266,51 +261,32 @@ public class MovieRepository {
 
     public List<PreviewMovieEntity> findTopMovies(final int count) {
         return jdbcTemplate.query("SELECT m.uuid, m.homepage, m.original_title, m.poster_path, " +
-                        "m.vote_average, m.vote_count, g.name FROM movies m " +
-                        "JOIN movies_genres mg on m.uuid = mg.movie_uuid " +
-                        "JOIN genres g on g.uuid = mg.genre_uuid " +
+                        "m.vote_average, m.vote_count FROM movies m " +
                         "ORDER BY m.vote_average DESC LIMIT ?",
-                (rs, i) -> {
-                    PreviewMovieEntity previewMovie = new PreviewMovieEntity();
-                    previewMovie.setUuid(rs.getObject("uuid", UUID.class));
-                    previewMovie.setHomepage(rs.getString("homepage"));
-                    previewMovie.setOriginalTitle(rs.getString("original_title"));
-                    previewMovie.setPosterPath(rs.getString("poster_path"));
-                    previewMovie.setVoteAverage(rs.getFloat("vote_average"));
-                    previewMovie.setVoteCount(rs.getLong("vote_count"));
-                    previewMovie.setGenre(rs.getString("name"));
-                    return previewMovie;
-                }, count);
+                this::fillPreviewMovieByResultSet, count);
     }
 
     public List<PreviewMovieEntity> findAll(final int offset, final int num) {
         return jdbcTemplate.query("SELECT m.uuid, m.homepage, m.original_title, m.poster_path, " +
                         "m.vote_average, m.vote_count FROM movies m ORDER BY m.vote_average DESC OFFSET ? LIMIT ?",
-                (rs, i) -> {
-                    PreviewMovieEntity previewMovie = new PreviewMovieEntity();
-                    previewMovie.setUuid(rs.getObject("uuid", UUID.class));
-                    previewMovie.setHomepage(rs.getString("homepage"));
-                    previewMovie.setOriginalTitle(rs.getString("original_title"));
-                    previewMovie.setPosterPath(rs.getString("poster_path"));
-                    previewMovie.setVoteAverage(rs.getFloat("vote_average"));
-                    previewMovie.setVoteCount(rs.getLong("vote_count"));
-                    return previewMovie;
-                }, offset, num);
+                this::fillPreviewMovieByResultSet, offset, num);
     }
 
     public List<PreviewMovieEntity> moviesByCollection(final UUID collectionUuid) {
         return jdbcTemplate.query("SELECT m.uuid, m.homepage, m.original_title, m.poster_path, " +
                         "m.vote_average, m.vote_count FROM movies m " +
                         "WHERE m.collection_uuid = ? ORDER BY m.release_date DESC",
-                (rs, i) -> {
-                    PreviewMovieEntity previewMovie = new PreviewMovieEntity();
-                    previewMovie.setUuid(rs.getObject("uuid", UUID.class));
-                    previewMovie.setHomepage(rs.getString("homepage"));
-                    previewMovie.setOriginalTitle(rs.getString("original_title"));
-                    previewMovie.setPosterPath(rs.getString("poster_path"));
-                    previewMovie.setVoteAverage(rs.getFloat("vote_average"));
-                    previewMovie.setVoteCount(rs.getLong("vote_count"));
-                    return previewMovie;
-                }, collectionUuid);
+                this::fillPreviewMovieByResultSet, collectionUuid);
+    }
+
+    private PreviewMovieEntity fillPreviewMovieByResultSet(ResultSet rs, int i) throws SQLException {
+        PreviewMovieEntity previewMovie = new PreviewMovieEntity();
+        previewMovie.setUuid(rs.getObject("uuid", UUID.class));
+        previewMovie.setHomepage(rs.getString("homepage"));
+        previewMovie.setOriginalTitle(rs.getString("original_title"));
+        previewMovie.setPosterPath(rs.getString("poster_path"));
+        previewMovie.setVoteAverage(rs.getFloat("vote_average"));
+        previewMovie.setVoteCount(rs.getLong("vote_count"));
+        return previewMovie;
     }
 }

@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import tech.itpark.dto.CountryDto;
+import tech.itpark.exception.CountryNotFoundException;
 import tech.itpark.mapper.CountryMapper;
 import tech.itpark.repository.MovieCountryRepository;
 
@@ -15,6 +16,7 @@ import java.util.UUID;
 @Service
 public class MovieCountryServiceImpl implements MovieCountryService {
 
+    public static final int BATCH_SIZE = 3000;
     private final CountryMapper mapper;
     private final MovieCountryRepository repository;
 
@@ -27,12 +29,12 @@ public class MovieCountryServiceImpl implements MovieCountryService {
     public CountryDto getCountry(final UUID uuid) {
         return repository.findByUuid(uuid)
                 .map(mapper::fromEntity)
-                .orElse(null);
+                .orElseThrow(() -> new CountryNotFoundException("not found country by uuid: " + uuid));
     }
 
     @Async
     @Override
     public List<UUID> save(final Set<CountryDto> countries) {
-        return repository.save(mapper.fromDtos(countries), 3000);
+        return repository.save(mapper.fromDtos(countries), BATCH_SIZE);
     }
 }

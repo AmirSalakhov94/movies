@@ -1,10 +1,13 @@
 package tech.itpark.repository;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 import tech.itpark.entity.LanguageEntity;
 
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.sql.Types;
 import java.util.Collections;
 import java.util.List;
@@ -32,24 +35,23 @@ public class MovieLanguageRepository {
     }
 
     public List<LanguageEntity> findAll() {
-        return jdbcTemplate.query("SELECT * FROM languages",
-                (rs, i) -> {
-                    LanguageEntity language = new LanguageEntity();
-                    language.setUuid(rs.getObject("uuid", UUID.class));
-                    language.setIso6391(rs.getString("iso_639_1"));
-                    language.setName(rs.getString("name"));
-                    return language;
-                });
+        return jdbcTemplate.query("SELECT * FROM languages", this::fillLanguageByResultSet);
     }
 
     public Optional<LanguageEntity> findByUuid(final UUID uuid) {
-        return Optional.ofNullable(jdbcTemplate.queryForObject("SELECT * FROM languages WHERE uuid = ?",
-                (rs, i) -> {
-                    LanguageEntity language = new LanguageEntity();
-                    language.setUuid(rs.getObject("uuid", UUID.class));
-                    language.setIso6391(rs.getString("iso_639_1"));
-                    language.setName(rs.getString("name"));
-                    return language;
-                }, uuid));
+        try {
+            return Optional.ofNullable(jdbcTemplate.queryForObject("SELECT * FROM languages WHERE uuid = ?",
+                    this::fillLanguageByResultSet, uuid));
+        } catch (EmptyResultDataAccessException ex) {
+            return Optional.empty();
+        }
+    }
+
+    private LanguageEntity fillLanguageByResultSet(ResultSet rs, int i) throws SQLException {
+        LanguageEntity language = new LanguageEntity();
+        language.setUuid(rs.getObject("uuid", UUID.class));
+        language.setIso6391(rs.getString("iso_639_1"));
+        language.setName(rs.getString("name"));
+        return language;
     }
 }

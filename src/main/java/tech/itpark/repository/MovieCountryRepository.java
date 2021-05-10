@@ -1,10 +1,13 @@
 package tech.itpark.repository;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 import tech.itpark.entity.CountryEntity;
 
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.sql.Types;
 import java.util.Collections;
 import java.util.List;
@@ -33,24 +36,23 @@ public class MovieCountryRepository {
     }
 
     public List<CountryEntity> findAll() {
-        return jdbcTemplate.query("SELECT * FROM countries",
-                (rs, i) -> {
-                    CountryEntity country = new CountryEntity();
-                    country.setUuid(rs.getObject("uuid", UUID.class));
-                    country.setIso31661(rs.getString("iso_3166_1"));
-                    country.setName(rs.getString("name"));
-                    return country;
-                });
+        return jdbcTemplate.query("SELECT * FROM countries", this::fillCountryByResultSet);
     }
 
     public Optional<CountryEntity> findByUuid(final UUID uuid) {
-        return Optional.ofNullable(jdbcTemplate.queryForObject("SELECT * FROM countries WHERE uuid = ?",
-                (rs, i) -> {
-                    CountryEntity country = new CountryEntity();
-                    country.setUuid(rs.getObject("uuid", UUID.class));
-                    country.setIso31661(rs.getString("iso_3166_1"));
-                    country.setName(rs.getString("name"));
-                    return country;
-                }, uuid));
+        try {
+            return Optional.ofNullable(jdbcTemplate.queryForObject("SELECT * FROM countries WHERE uuid = ?",
+                    this::fillCountryByResultSet, uuid));
+        } catch (EmptyResultDataAccessException ex) {
+            return Optional.empty();
+        }
+    }
+
+    private CountryEntity fillCountryByResultSet(ResultSet rs, int i) throws SQLException {
+        CountryEntity country = new CountryEntity();
+        country.setUuid(rs.getObject("uuid", UUID.class));
+        country.setIso31661(rs.getString("iso_3166_1"));
+        country.setName(rs.getString("name"));
+        return country;
     }
 }

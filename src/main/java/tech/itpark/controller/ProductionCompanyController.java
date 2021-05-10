@@ -24,7 +24,7 @@ public class ProductionCompanyController {
     }
 
     @GetMapping("/{uuid}")
-    public CompanyDto company(@PathVariable("uuid") UUID uuid) {
+    public CompanyDto company(@PathVariable("uuid") final UUID uuid) {
         return productionCompanyService.getCompany(uuid);
     }
 }

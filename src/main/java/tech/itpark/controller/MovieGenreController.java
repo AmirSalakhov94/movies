@@ -24,7 +24,7 @@ public class MovieGenreController {
     }
 
     @GetMapping("/{uuid}")
-    public GenreDto genre(@PathVariable("uuid") UUID uuid) {
+    public GenreDto genre(@PathVariable("uuid") final UUID uuid) {
         return movieGenreService.getGenre(uuid);
     }
 }

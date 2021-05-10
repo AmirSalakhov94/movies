@@ -3,6 +3,7 @@ package tech.itpark.service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import tech.itpark.dto.CompanyDto;
+import tech.itpark.exception.ProductionCompanyNotFoundException;
 import tech.itpark.mapper.CompanyMapper;
 import tech.itpark.repository.ProductionCompanyRepository;
 
@@ -14,6 +15,7 @@ import java.util.UUID;
 @Service
 public class ProductionCompanyServiceImpl implements ProductionCompanyService {
 
+    public static final int BATCH_SIZE = 3000;
     private final CompanyMapper mapper;
     private final ProductionCompanyRepository repository;
 
@@ -26,11 +28,11 @@ public class ProductionCompanyServiceImpl implements ProductionCompanyService {
     public CompanyDto getCompany(final UUID uuid) {
         return repository.findByUuid(uuid)
                 .map(mapper::fromEntity)
-                .orElse(null);
+                .orElseThrow(() -> new ProductionCompanyNotFoundException("not found production company by uuid: " + uuid));
     }
 
     @Override
     public void save(final Set<CompanyDto> companies) {
-        repository.save(mapper.fromDtos(companies), 3000);
+        repository.save(mapper.fromDtos(companies), BATCH_SIZE);
     }
 }

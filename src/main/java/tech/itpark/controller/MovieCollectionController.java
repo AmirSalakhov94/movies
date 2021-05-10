@@ -24,7 +24,7 @@ public class MovieCollectionController {
     }
 
     @GetMapping("/{uuid}")
-    public CollectionDto collection(@PathVariable("uuid") UUID uuid) {
+    public CollectionDto collection(@PathVariable("uuid") final UUID uuid) {
         return movieCollectionService.getCollection(uuid);
     }
 }

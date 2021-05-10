@@ -1,10 +1,13 @@
 package tech.itpark.repository;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 import tech.itpark.entity.CollectionEntity;
 
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.sql.Types;
 import java.util.Collections;
 import java.util.List;
@@ -35,28 +38,25 @@ public class MovieCollectionRepository {
     }
 
     public List<CollectionEntity> findAll() {
-        return jdbcTemplate.query("SELECT * FROM collections",
-                (rs, i) -> {
-                    CollectionEntity collection = new CollectionEntity();
-                    collection.setUuid(rs.getObject("uuid", UUID.class));
-                    collection.setIdWithFile(rs.getLong("id_with_file"));
-                    collection.setName(rs.getString("name"));
-                    collection.setPosterPath(rs.getString("poster_path"));
-                    collection.setBackdropPath(rs.getString("backdrop_path"));
-                    return collection;
-                });
+        return jdbcTemplate.query("SELECT * FROM collections", this::fillCollectionByResultSet);
     }
 
     public Optional<CollectionEntity> findByUuid(final UUID uuid) {
-        return Optional.ofNullable(jdbcTemplate.queryForObject("SELECT * FROM collections WHERE uuid = ?",
-                (rs, i) -> {
-                    CollectionEntity collection = new CollectionEntity();
-                    collection.setUuid(rs.getObject("uuid", UUID.class));
-                    collection.setIdWithFile(rs.getLong("id_with_file"));
-                    collection.setName(rs.getString("name"));
-                    collection.setPosterPath(rs.getString("poster_path"));
-                    collection.setBackdropPath(rs.getString("backdrop_path"));
-                    return collection;
-                }, uuid));
+        try {
+            return Optional.ofNullable(jdbcTemplate.queryForObject("SELECT * FROM collections WHERE uuid = ?",
+                    this::fillCollectionByResultSet, uuid));
+        } catch (EmptyResultDataAccessException ex) {
+            return Optional.empty();
+        }
+    }
+
+    private CollectionEntity fillCollectionByResultSet(ResultSet rs, int i) throws SQLException {
+        CollectionEntity collection = new CollectionEntity();
+        collection.setUuid(rs.getObject("uuid", UUID.class));
+        collection.setIdWithFile(rs.getLong("id_with_file"));
+        collection.setName(rs.getString("name"));
+        collection.setPosterPath(rs.getString("poster_path"));
+        collection.setBackdropPath(rs.getString("backdrop_path"));
+        return collection;
     }
 }

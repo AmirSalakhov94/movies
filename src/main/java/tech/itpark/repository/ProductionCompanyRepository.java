@@ -1,10 +1,13 @@
 package tech.itpark.repository;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 import tech.itpark.entity.CompanyEntity;
 
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.sql.Types;
 import java.util.Collections;
 import java.util.List;
@@ -33,24 +36,23 @@ public class ProductionCompanyRepository {
     }
 
     public List<CompanyEntity> findAll() {
-        return jdbcTemplate.query("SELECT * FROM genres",
-                (rs, i) -> {
-                    CompanyEntity company = new CompanyEntity();
-                    company.setUuid(rs.getObject("uuid", UUID.class));
-                    company.setIdWithFile(rs.getLong("id_with_file"));
-                    company.setName(rs.getString("name"));
-                    return company;
-                });
+        return jdbcTemplate.query("SELECT * FROM genres", this::fillCompanyByResultSet);
     }
 
     public Optional<CompanyEntity> findByUuid(final UUID uuid) {
-        return Optional.ofNullable(jdbcTemplate.queryForObject("SELECT * FROM genres WHERE uuid = ?",
-                (rs, i) -> {
-                    CompanyEntity company = new CompanyEntity();
-                    company.setUuid(rs.getObject("uuid", UUID.class));
-                    company.setIdWithFile(rs.getLong("id_with_file"));
-                    company.setName(rs.getString("name"));
-                    return company;
-                }, uuid));
+        try {
+            return Optional.ofNullable(jdbcTemplate.queryForObject("SELECT * FROM genres WHERE uuid = ?",
+                    this::fillCompanyByResultSet, uuid));
+        } catch (EmptyResultDataAccessException ex) {
+            return Optional.empty();
+        }
+    }
+
+    private CompanyEntity fillCompanyByResultSet(ResultSet rs, int i) throws SQLException {
+        CompanyEntity company = new CompanyEntity();
+        company.setUuid(rs.getObject("uuid", UUID.class));
+        company.setIdWithFile(rs.getLong("id_with_file"));
+        company.setName(rs.getString("name"));
+        return company;
     }
 }
