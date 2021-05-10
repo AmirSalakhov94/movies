@@ -3,6 +3,6 @@ WORKDIR /app
 COPY . .
 RUN mvn -B package
 
-FROM tomcat:10-jdk16-openjdk-slim
+FROM tomcat:9.0.45-jdk16-openjdk
 COPY --from=build /app/target/movies-1.0.war $CATALINA_HOME/webapps/ROOT.war
 EXPOSE 8080
