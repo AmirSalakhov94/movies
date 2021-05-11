@@ -13,7 +13,7 @@ jobs:
         uses: docker/build-push-action@v1
         with:
           username: ${{ github.actor }}
-          password: ${{ secrets.GHCR_TOKEN }}
+          password: ${{ secrets.MOVIES_TOKEN }}
           repository: amirsalakhov94/servlets
           registry: ghcr.io
           tag_with_ref: true
