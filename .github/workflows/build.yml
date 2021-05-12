@@ -14,6 +14,6 @@ jobs:
         with:
           username: ${{ github.actor }}
           password: ${{ secrets.MOVIES_TOKEN }}
-          repository: amirsalakhov94/servlets
+          repository: amirsalakhov94/movies
           registry: ghcr.io
           tag_with_ref: true
