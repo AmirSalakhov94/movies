@@ -1,7 +1,6 @@
 package tech.itpark.service;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import tech.itpark.dto.LanguageDto;
 import tech.itpark.exception.LanguageNotFoundException;
@@ -32,7 +31,6 @@ public class MovieLanguageServiceImpl implements MovieLanguageService {
                 .orElseThrow(() -> new LanguageNotFoundException("not found language by uuid: " + uuid));
     }
 
-    @Async
     @Override
     public List<UUID> save(Set<LanguageDto> languages) {
         return repository.save(mapper.fromDtos(languages), BATCH_SIZE);

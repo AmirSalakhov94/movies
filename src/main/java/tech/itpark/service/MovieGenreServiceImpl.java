@@ -1,7 +1,6 @@
 package tech.itpark.service;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import tech.itpark.dto.GenreDto;
 import tech.itpark.exception.GenreNotFoundException;
@@ -32,7 +31,6 @@ public class MovieGenreServiceImpl implements MovieGenreService {
                 .orElseThrow(() -> new GenreNotFoundException("not found genre by uuid: " + uuid));
     }
 
-    @Async
     @Override
     public List<UUID> save(final Set<GenreDto> genres) {
         return repository.save(mapper.fromDtos(genres), BATCH_SIZE);

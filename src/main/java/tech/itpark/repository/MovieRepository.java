@@ -14,10 +14,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
 import java.util.*;
-import java.util.concurrent.Callable;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
@@ -35,17 +31,6 @@ public class MovieRepository {
         List<Pair<UUID, UUID>> countriesPair = new ArrayList<>();
         List<Pair<UUID, UUID>> genresPair = new ArrayList<>();
         List<Pair<UUID, UUID>> languagesPair = new ArrayList<>();
-
-        CompletableFuture<Boolean> future = CompletableFuture.supplyAsync(() -> {
-            movies.forEach(m -> {
-                m.getCompanies().forEach(c -> companiesPair.add(ImmutablePair.of(m.getUuid(), c.getUuid())));
-                m.getCountries().forEach(c -> countriesPair.add(ImmutablePair.of(m.getUuid(), c.getUuid())));
-                m.getGenres().forEach(g -> genresPair.add(ImmutablePair.of(m.getUuid(), g.getUuid())));
-                m.getLanguages().forEach(l -> languagesPair.add(ImmutablePair.of(m.getUuid(), l.getUuid())));
-            });
-
-            return true;
-        });
 
         jdbcTemplate.batchUpdate("INSERT INTO movies (uuid, id_with_file, is_adult, budget," +
                         " imdb_id, homepage, original_language, original_title, poster_path, overview, popularity, release_date," +
@@ -80,55 +65,40 @@ public class MovieRepository {
                     } else {
                         preparedStatement.setObject(++index, null);
                     }
+
+                    movieEntity.getCompanies().forEach(c -> companiesPair.add(ImmutablePair.of(movieEntity.getUuid(), c.getUuid())));
+                    movieEntity.getCountries().forEach(c -> countriesPair.add(ImmutablePair.of(movieEntity.getUuid(), c.getUuid())));
+                    movieEntity.getGenres().forEach(g -> genresPair.add(ImmutablePair.of(movieEntity.getUuid(), g.getUuid())));
+                    movieEntity.getLanguages().forEach(l -> languagesPair.add(ImmutablePair.of(movieEntity.getUuid(), l.getUuid())));
                 });
 
-        if (Boolean.TRUE.equals(future.get())) {
-            ExecutorService worker = Executors.newFixedThreadPool(4);
-            List<Callable<Boolean>> callables = Arrays.asList(
-                    () -> {
-                        jdbcTemplate.batchUpdate("INSERT INTO movies_companies (movie_uuid, company_uuid)" +
-                                " VALUES (?, ?)", companiesPair, batchSize, ((preparedStatement, pair) -> {
-                            int index = 0;
-                            preparedStatement.setObject(++index, pair.getLeft(), Types.OTHER);
-                            preparedStatement.setObject(++index, pair.getRight(), Types.OTHER);
-                        }));
+        jdbcTemplate.batchUpdate("INSERT INTO movies_companies (movie_uuid, company_uuid)" +
+                " VALUES (?, ?)", companiesPair, batchSize, ((preparedStatement, pair) -> {
+            int index = 0;
+            preparedStatement.setObject(++index, pair.getLeft(), Types.OTHER);
+            preparedStatement.setObject(++index, pair.getRight(), Types.OTHER);
+        }));
 
-                        return true;
-                    },
-                    () -> {
-                        jdbcTemplate.batchUpdate("INSERT INTO movies_countries (movie_uuid, country_uuid)" +
-                                " VALUES (?, ?)", countriesPair, batchSize, ((preparedStatement, pair) -> {
-                            int index = 0;
-                            preparedStatement.setObject(++index, pair.getLeft(), Types.OTHER);
-                            preparedStatement.setObject(++index, pair.getRight(), Types.OTHER);
-                        }));
+        jdbcTemplate.batchUpdate("INSERT INTO movies_countries (movie_uuid, country_uuid)" +
+                " VALUES (?, ?)", countriesPair, batchSize, ((preparedStatement, pair) -> {
+            int index = 0;
+            preparedStatement.setObject(++index, pair.getLeft(), Types.OTHER);
+            preparedStatement.setObject(++index, pair.getRight(), Types.OTHER);
+        }));
 
-                        return true;
-                    },
-                    () -> {
-                        jdbcTemplate.batchUpdate("INSERT INTO movies_genres (movie_uuid, genre_uuid)" +
-                                " VALUES (?, ?)", genresPair, batchSize, ((preparedStatement, pair) -> {
-                            int index = 0;
-                            preparedStatement.setObject(++index, pair.getLeft(), Types.OTHER);
-                            preparedStatement.setObject(++index, pair.getRight(), Types.OTHER);
-                        }));
+        jdbcTemplate.batchUpdate("INSERT INTO movies_genres (movie_uuid, genre_uuid)" +
+                " VALUES (?, ?)", genresPair, batchSize, ((preparedStatement, pair) -> {
+            int index = 0;
+            preparedStatement.setObject(++index, pair.getLeft(), Types.OTHER);
+            preparedStatement.setObject(++index, pair.getRight(), Types.OTHER);
+        }));
 
-                        return true;
-                    },
-                    () -> {
-                        jdbcTemplate.batchUpdate("INSERT INTO movies_languages (movie_uuid, language_uuid)" +
-                                " VALUES (?, ?)", languagesPair, batchSize, ((preparedStatement, pair) -> {
-                            int index = 0;
-                            preparedStatement.setObject(++index, pair.getLeft(), Types.OTHER);
-                            preparedStatement.setObject(++index, pair.getRight(), Types.OTHER);
-                        }));
-
-                        return true;
-                    }
-            );
-
-            worker.invokeAll(callables);
-        }
+        jdbcTemplate.batchUpdate("INSERT INTO movies_languages (movie_uuid, language_uuid)" +
+                " VALUES (?, ?)", languagesPair, batchSize, ((preparedStatement, pair) -> {
+            int index = 0;
+            preparedStatement.setObject(++index, pair.getLeft(), Types.OTHER);
+            preparedStatement.setObject(++index, pair.getRight(), Types.OTHER);
+        }));
 
         return movies.stream().map(MovieEntity::getUuid).collect(Collectors.toList());
     }

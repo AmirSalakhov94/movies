@@ -1,7 +1,6 @@
 package tech.itpark.service;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import tech.itpark.dto.CollectionDto;
 import tech.itpark.exception.CollectionNotFoundException;
@@ -32,7 +31,6 @@ public class MovieCollectionServiceImpl implements MovieCollectionService {
                 .orElseThrow(() -> new CollectionNotFoundException("not found collection by uuid: " + uuid));
     }
 
-    @Async
     @Override
     public List<UUID> save(final Set<CollectionDto> collections) {
         return repository.save(mapper.fromDtos(collections), BATCH_SIZE);
