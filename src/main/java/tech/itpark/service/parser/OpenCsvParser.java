@@ -79,7 +79,7 @@ public class OpenCsvParser implements Parser<CsvParserData> {
 
                         Optional.ofNullable(csvData.getCollection())
                                 .filter(StringUtils::isNotBlank)
-                                .map(v -> gson.fromJson(v.replace("\\", ""), CollectionDto.class))
+                                .map(v -> fromJsonWithReplaceBackslash(v, CollectionDto.class))
                                 .ifPresent(collection -> {
                                     UUID uuid = collectionMap.get(collection);
                                     if (uuid == null) {
@@ -93,7 +93,7 @@ public class OpenCsvParser implements Parser<CsvParserData> {
                         Optional.ofNullable(csvData.getGenres())
                                 .filter(StringUtils::isNotBlank)
                                 .ifPresent(v -> {
-                                    List<GenreDto> currentGenres = Arrays.stream(gson.fromJson(v.replace("\\", ""), GenreDto[].class))
+                                    List<GenreDto> currentGenres = Arrays.stream(fromJsonWithReplaceBackslash(v, GenreDto[].class))
                                             .peek(genre -> {
                                                 UUID uuid = genreMap.get(genre);
                                                 if (uuid == null) {
@@ -109,7 +109,7 @@ public class OpenCsvParser implements Parser<CsvParserData> {
                         Optional.ofNullable(csvData.getCompanies())
                                 .filter(StringUtils::isNotBlank)
                                 .ifPresent(v -> {
-                                    List<CompanyDto> currentCompanies = Arrays.stream(gson.fromJson(v.replace("\\", ""), CompanyDto[].class))
+                                    List<CompanyDto> currentCompanies = Arrays.stream(fromJsonWithReplaceBackslash(v, CompanyDto[].class))
                                             .peek(company -> {
                                                 UUID uuid = companyMap.get(company);
                                                 if (uuid == null) {
@@ -125,7 +125,7 @@ public class OpenCsvParser implements Parser<CsvParserData> {
                         Optional.ofNullable(csvData.getCountries())
                                 .filter(StringUtils::isNotBlank)
                                 .ifPresent(v -> {
-                                    List<CountryDto> currentCountries = Arrays.stream(gson.fromJson(v.replace("\\", ""), CountryDto[].class))
+                                    List<CountryDto> currentCountries = Arrays.stream(fromJsonWithReplaceBackslash(v, CountryDto[].class))
                                             .peek(country -> {
                                                 UUID uuid = countryMap.get(country);
                                                 if (uuid == null) {
@@ -141,7 +141,7 @@ public class OpenCsvParser implements Parser<CsvParserData> {
                         Optional.ofNullable(csvData.getLanguages())
                                 .filter(StringUtils::isNotBlank)
                                 .ifPresent(v -> {
-                                    List<LanguageDto> currentLanguages = Arrays.stream(gson.fromJson(v.replace("\\", ""), LanguageDto[].class))
+                                    List<LanguageDto> currentLanguages = Arrays.stream(fromJsonWithReplaceBackslash(v, LanguageDto[].class))
                                             .peek(language -> {
                                                 UUID uuid = languageMap.get(language);
                                                 if (uuid == null) {
@@ -171,5 +171,9 @@ public class OpenCsvParser implements Parser<CsvParserData> {
                 .languages(languageMap.keySet())
                 .capturedExceptions(csvToBean.getCapturedExceptions())
                 .build();
+    }
+
+    private <T> T fromJsonWithReplaceBackslash(String v, Class<T> type) {
+        return gson.fromJson(v.replace("\\", ""), type);
     }
 }
